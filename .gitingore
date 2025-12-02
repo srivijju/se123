@@ -1,0 +1,318 @@
+Maven java app
+ Click on File->New->Maven Project
+Type quickstart in Filter and wait for artifacts to load, Select org.apache.maven.archetypes   maven-archetype-quickstart 1.4 and click on next
+Mention TeamID: as SE, ArtifactID: MavenJava and click on next
+Now right click on App.java->Run as->Maven Clean, Maven Install, Maven Test, Maven Build
+In Goals, Type “clean install test”, App.java->Run as->Java Application
+
+Maven Web App
+Click on File->New->Maven Project
+Type webapp in Filter and wait for artifacts to load, Select org.apache.maven.archetypes   maven-archetype-webapp 1.4 and click on next
+Mention TeamID: as SE, ArtifactID: MavenWeb and click on next
+Copy java servlet api latest version and add it under dependencies in pom.xml
+showview->servers, Select Tomcat v9.0 server/ Tomcat v11.0 server in the server type Click on next, select Apache Tomcat v9.0(optional)
+Double click “servers” folder present at the left side in project explorer, click on Tomcat v9.0 server at localhost-config->tomcat-users.xml, scroll to the end and paste the following exactly above </tomcat-users> tag and close the tab.
+
+< role rolename="admin-gui,manager-gui ,manager-script,manager-jmx,manager-status"/><userpassword="1234"roles="manager-gui, admin-gui ,manager-script"username="admin"/>
+index.jsp ->Run as->Maven Clean, Maven Install,Maven Test,Maven Build
+index.jsp ->Run as->Run on server, click on OK
+
+Docker
+Index.html – create simple html file saying hello world
+Dockerfile
+FROM nginx:latest
+# Copy HTML file to NGINX web directory
+COPY index.html /usr/share/nginx/html/
+EXPOSE 80
+
+Commands :
+docker build -t myhtmlapp . 
+docker run -d -p 8081:80 myhtmlapp
+
+Docker compose
+Create Multi-Container of MySQL and WordPress using Docker.
+
+docker-compose.yml
+version: '3.8'
+services:
+  wordpress:
+    image: wordpress:latest
+    container_name: wordpress
+    restart: always
+    ports:
+      - "8088:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wp_user
+      WORDPRESS_DB_PASSWORD: wp_pass
+      WORDPRESS_DB_NAME: wordpress_db
+    depends_on:
+      - db
+    volumes:
+      - wordpress_data:/var/www/html
+
+  db:
+    image: mysql:5.7
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: wordpress_db
+      MYSQL_USER: wp_user
+      MYSQL_PASSWORD: wp_pass
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  wordpress_data:
+  db_data:
+
+nginx+tomcat
+docker-compose.yml:
+services:
+  web:
+    image: nginx
+    ports:
+      - "8060:80"
+  db:
+    image: tomee
+    ports:
+      - "8050:8080"
+
+Create a Docker Compose setup with a Node.js app and MongoDB.
+
+app.js 
+const express = require("express");
+const app = express();
+
+app.get("/", (req, res) => {
+  res.send("Node + MongoDB Docker Setup Working!");
+});
+
+app.listen(3000, () => {
+  console.log("Server running at http://localhost:3000");
+});
+
+package.json
+{
+  "name": "basic-node",
+  "version": "1.0.0",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
+docker-compose.yml:
+version: "3.8"
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+
+Dockerfile
+FROM node:18
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+EXPOSE 3000
+CMD ["node", "server.js"]
+
+Flask App
+App.py
+from flask import Flask
+app = Flask(_name_)
+
+@app.route("/")
+def home():
+    return "Hello from 24BD5A0503- NEKSHASRINIVAS"
+
+if _name_ == "_main_":
+    app.run(host="0.0.0.0", port=5000)
+
+
+Dockerfile
+FROM python:3.10-slim
+WORKDIR /app
+COPY app.py /app/
+RUN pip install flask
+CMD ["python", "app.py"]
+
+Docker-compose.yml
+version: "3.9"
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+    ports:
+      - "3307:3306"
+
+Commands:
+docker-compose up -d
+docker-compose down
+
+Jenkins 
+Mavenjava:
+build step > give maven version as MAVEN_HOME > select invoke top level maven targets > goals as clean, goals as install
+post build actions > click on add post build action > select the archive the artifacts > in the file to archive give “**/*”> click on add post build action >select build other projects > give projects to build as MavenJava_Test
+delete workspace before build starts
+build steps> select add a build step> select “copy artifacts from another project” > give project name as Maven java and artifacts to copy as **/*
+post build actions> select archive the artifacts and enter files as **/*
+MavenWeb:
+Mavenweb-build
+add build step > give maven version as MAVEN_HOME > select invoke top level maven targets > goals as clean , goals as install
+post build actions > click on add post build action > select the archive the artifacts > in the file to archive give “**/*”,select build other projects > give projects to build as maven_web_test
+maven_web_test
+delete workspace before build starts”
+add build step > select copy artifacts from another project > give project name as maven_web_build > give artifacts to copy as **/*, select invoke top level maven targets > goals as test
+click on add post build action > select the archive the artifacts > in the file to archive give **/*, select build other projects > give name as maven_web_deploy> select “trigger only if build is stable”
+maven_web_deploy
+“delete workspace before build starts”
+add build step > select copy artifacts from another project > give project name as maven_web_test > give artifacts to copy as **/*
+click on add post build actions > select deploy war/ear to a container > enter war/ear files as **/*.war> context path as webpath > give the credentials and tomcat URL
+in credentials 
+id: tomcat-admin-cred
+description : tomcat deployment
+Tomcat URL : http://localhost:8081/manager/text/
+http://localhost:8081/manager/text/
+in tomcat-users.xml:
+<role rolename="manager-gui"/>
+<role rolename="manager-script"/>
+<role rolename="manager-status"/>
+<role rolename="manager-jmx"/>
+<user username="admin" password="1234" roles="manager-gui,manager-script,manager-status,manager-jmx"/>
+
+Jenkins script
+pipeline {
+    agent any
+    tools{
+        maven 'MAVEN_HOME'
+    }
+    stages {
+        stage('git repo & clean') {
+            steps {
+                //bat "rmdir  /s /q mavenjava"
+                bat "git clone https://github.com/srivijju/jenkins_web.git"
+                bat "mvn clean -f jenkins_web"
+            }
+        }
+        stage('install') {
+            steps {
+                bat "mvn install -f jenkins_web"
+            }
+        }
+        stage('test') {
+            steps {
+                bat "mvn test -f jenkins_web"
+            }
+        }
+        stage('package') {
+            steps {
+                bat "mvn package -f jenkins_web"
+            }
+        }
+    }
+}
+
+Minikube(nginx and nagios)
+ minikube start —driver=docker
+minikube status
+ kubectl create deployment mynginx  —image=nginx
+ kubectl get deployments
+ kubectl get pods
+ kubectl describe pods
+ kubectl expose deployment mynginx  —type=NodePort  —port=80  -target-port=80
+ kubectl get service mynginx
+ kubectl port-forward svc/mynginx 80:80
+ kubectl get deployment
+ kubectl scale deployment mynginx
+ kubectl get pods
+
+## Nagios
+1. docker pull jasonrivers/nagios:latest
+2. docker run --name nagiosdemo -p 8088:80 jasonrivers/nagios:latest
+3. OPEN [http://localhost:8888](http://localhost:8088/)
+4. Login:
+username: nagiosadmin
+password: nagios
+5. docker stop nagiosdemo
+
+AWS
+int the cli tht pops up type the following commands
+    1. sudo su
+    2. sudo apt-get update
+    3. sudo apt-get install [docker.io](http://docker.io) enter y
+    4. sudo docker —version
+    5. git clone https://github.com/archanareddyse/mavenweb
+    6. cd folder name
+    7. nano Dockerfile
+    8. sudo docker build -t img1  .
+    9. sudo docker run -d -p 8080:8080 img1
+    10. copy the public ip
+    11 got to incog ip:portnumber
+
+Webhooks
+Ngrok
+
+ngrok config add-authtoken <yourtoken>
+ngrok http 8080
+paste in payload in github with /github-webhook/
+
+Git
+git init                 → Creates a new local Git repository
+git status               → Shows changed, staged, and untracked files
+git add .                → Adds all files to staging area
+git add <filename>       → Adds a specific file to staging
+git commit -m "msg"      → Saves staged changes with a commit message
+git log                  → Shows full commit history
+git log --oneline        → Shows short commit history
+
+git branch               → Shows all branches
+git branch <name>        → Creates a new branch
+git checkout <name>      → Switches to a branch
+git checkout -b <name>   → Creates AND switches to a new branch
+git switch <name>        → Switches branch (newer command)
+
+git merge <name>         → Merges the branch into current branch
+
+git remote add origin <url>  → Connects local repo to remote repo
+git remote -v                → Shows remote URL
+git push origin <branch>     → Pushes code to GitHub
+git push -u origin <branch>  → First push + sets upstream branch
+git pull origin <branch>     → Gets latest code from GitHub
+git clone <url>              → Downloads a repository
+
+git reset <file>             → Unstages a file
+git reset --hard <commit>    → Resets repo to an old commit (deletes changes)
+git revert <commit>          → Creates a new commit that undoes an old commit
+
+git stash                    → Temporarily saves uncommitted work
+git stash list               → Shows all stashes
+git stash apply              → Restores latest stash
+git stash drop               → Deletes a stash
+
+git diff                     → Shows differences between files
+git show <commit>            → Shows details of a specific commit
+
+git tag v1.0                 → Creates a version tag
+git push origin --tags       → Pushes tags to GitHub
